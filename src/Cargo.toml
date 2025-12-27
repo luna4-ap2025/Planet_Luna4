@@ -1,0 +1,17 @@
+[package]
+name = "luna4"
+version = "2.0.0"
+edition = "2021"
+
+[dependencies]
+common_game = { git = "https://github.com/unitn-ap-2025/common.git" }
+crossbeam-channel = "0.5"
+log = "0.4"
+thiserror = "1.0"
+
+[dev-dependencies]
+tempfile = "3.4"
+
+[profile.release]
+lto = true
+codegen-units = 1
