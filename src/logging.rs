@@ -65,9 +65,9 @@ pub fn log_resource_generation_attempt(
     };
     
     let data = [
-        ("resource".to_string(), resource_type.as_ref().to_string()),
-        ("success".to_string(), success.to_string()),
-        ("lunar_phase".to_string(), format!("{:?}", phase)),
+        ("resource", resource_type.as_ref().to_string()),
+        ("success", success.to_string()),
+        ("lunar_phase", format!("{:?}", phase)),
     ];
     
     let channel = if success {
@@ -104,9 +104,9 @@ pub fn log_lunar_phase_transition(
     let message = format!("Phase transition: {} → {}", from_phase.name(), to_phase.name());
     
     let data = [
-        ("from_phase".to_string(), format!("{:?}", from_phase)),
-        ("to_phase".to_string(), format!("{:?}", to_phase)),
-        ("duration_seconds".to_string(), duration_in_phase.as_secs().to_string()),
+        ("from_phase", format!("{:?}", from_phase)),
+        ("to_phase", format!("{:?}", to_phase)),
+        ("duration_seconds", duration_in_phase.as_secs().to_string()),
     ];
     
     log_planet_event(
@@ -142,9 +142,9 @@ pub fn log_explorer_interaction(
     );
     
     let data = [
-        ("explorer_id".to_string(), explorer_id.to_string()),
-        ("action".to_string(), action.as_ref().to_string()),
-        ("success".to_string(), success.to_string()),
+        ("explorer_id", explorer_id.to_string()),
+        ("action", action.as_ref().to_string()),
+        ("success", success.to_string()),
     ];
     
     let channel = if success {
@@ -175,7 +175,7 @@ pub fn log_explorer_interaction(
 /// * `energy_total` - Total number of energy cells
 pub fn log_operational_statistics(
     planet_id: Luna4Id,
-    stats: &crate::planet::state::OperationalStats,
+    stats: &crate::planet::OperationalStats,  // CORRECT: using re-export from mod.rs
     energy_charged: usize,
     energy_total: usize,
 ) {
@@ -184,14 +184,14 @@ pub fn log_operational_statistics(
     } else {
         0.0
     };
-    
+
     let data = [
-        ("total_resources".to_string(), stats.total_resources_generated.to_string()),
-        ("phase_transitions".to_string(), stats.phase_transitions.to_string()),
-        ("explorer_arrivals".to_string(), stats.explorer_arrivals.to_string()),
-        ("energy_percentage".to_string(), format!("{:.1}%", energy_percentage)),
+        ("total_resources", stats.total_resources_generated.to_string()),
+        ("phase_transitions", stats.phase_transitions.to_string()),
+        ("explorer_arrivals", stats.explorer_arrivals.to_string()),
+        ("energy_percentage", format!("{:.1}%", energy_percentage)),
     ];
-    
+
     log_planet_event(
         planet_id,
         EventType::InternalPlanetAction,
@@ -200,6 +200,7 @@ pub fn log_operational_statistics(
         Some(data),
     );
 }
+
 
 #[cfg(test)]
 mod tests {

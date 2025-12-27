@@ -4,12 +4,8 @@
 //! the main Luna4 struct, unique identifiers, and AI implementation.
 
 mod ai;
-mod state;
-mod stats;
 
-pub use state::{Luna4State, OperationalStats};
 pub(crate) use ai::Luna4AI;
-pub(crate) use stats::Luna4Stats;
 
 use crossbeam_channel::{Receiver, Sender};
 
@@ -19,7 +15,7 @@ use crate::planet::errors::Luna4Error;
 use crate::planet::resources::ResourceManager;
 
 use common_game::components::planet::{Planet, PlanetType};
-use common_game::components::resource::{BasicResourceType, ComplexResourceType};
+use common_game::components::resource::BasicResourceType;
 use common_game::protocols::orchestrator_planet::{OrchestratorToPlanet, PlanetToOrchestrator};
 use common_game::protocols::planet_explorer::ExplorerToPlanet;
 use common_game::utils::ID;
@@ -42,7 +38,7 @@ impl Luna4Id {
     pub fn new(id: ID) -> Self {
         Self(id)
     }
-    
+
     /// Returns the underlying numeric ID
     ///
     /// # Returns
@@ -99,7 +95,7 @@ impl Luna4 {
         let energy = EnergyManager::new(5)?; // Luna4 has exactly 5 energy cells
         let resources = ResourceManager::new();
         let cycle = LunarCycle::default();
-        
+
         Ok(Self {
             id,
             energy,
@@ -107,7 +103,7 @@ impl Luna4 {
             cycle,
         })
     }
-    
+
     /// Creates the common Planet wrapper for orchestrator integration
     ///
     /// This method constructs a `Planet` instance that wraps Luna4's
@@ -136,10 +132,10 @@ impl Luna4 {
             BasicResourceType::Carbon,
             BasicResourceType::Silicon,
         ];
-        
+
         // Luna4 cannot create complex resources (no combination rules)
         let comb_rules = Vec::new();
-        
+
         // Create AI implementation
         let ai = Box::new(Luna4AI::new(
             self.id,
@@ -147,7 +143,7 @@ impl Luna4 {
             self.resources,
             self.cycle,
         ));
-        
+
         Planet::new(
             self.id.as_u32(),
             PlanetType::D, // Type D: 5 energy cells, unbounded generation, no rockets
@@ -158,7 +154,7 @@ impl Luna4 {
             rx_explorer,
         ).map_err(Luna4Error::PlanetCreation)
     }
-    
+
     /// Returns the planet identifier
     ///
     /// # Returns
@@ -172,30 +168,30 @@ impl Luna4 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_luna4_id_creation() {
         let id = Luna4Id::new(42);
         assert_eq!(id.as_u32(), 42);
     }
-    
+
     #[test]
     fn test_luna4_id_display() {
         let id = Luna4Id::new(42);
         assert_eq!(format!("{}", id), "Luna4#42");
     }
-    
+
     #[test]
     fn test_luna4_id_from_conversion() {
         let id: Luna4Id = 42.into();
         assert_eq!(id.as_u32(), 42);
     }
-    
+
     #[test]
     fn test_luna4_constructor() {
         let luna4 = Luna4::new(1);
         assert!(luna4.is_ok());
-        
+
         let luna4 = luna4.unwrap();
         assert_eq!(luna4.id().as_u32(), 1);
     }

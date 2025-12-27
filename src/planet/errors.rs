@@ -12,7 +12,7 @@ use thiserror::Error;
 /// during Luna4 planet creation, operation, or resource management.
 /// Each variant includes a descriptive error message.
 #[derive(Error, Debug)]
-pub(crate) enum Luna4Error {
+pub enum Luna4Error {
     /// Failed to create the planet wrapper
     #[error("Failed to create planet: {0}")]
     PlanetCreation(String),

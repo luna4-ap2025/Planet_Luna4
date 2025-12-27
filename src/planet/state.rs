@@ -16,7 +16,7 @@ use super::Luna4Id;
 /// including timing information, explorer presence, and generation history.
 /// It is used internally by the Luna4 AI implementation.
 #[derive(Debug)]
-pub(crate) struct Luna4State {
+pub struct Luna4State {
     /// Planet identifier
     pub(crate) id: Luna4Id,
     /// Current lunar phase
