@@ -48,7 +48,7 @@ pub fn log_planet_event(
 /// The log includes whether the attempt succeeded and the current lunar phase.
 ///
 /// # Arguments
-/// * `planet_id` - Identifier of the Luna4 planet
+/// * `planet_id` - Identifier of the Luna4 planett
 /// * `resource_type` - Type of resource being generated
 /// * `success` - Whether the generation succeeded
 /// * `phase` - Current lunar phase during generation
