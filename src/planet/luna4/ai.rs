@@ -13,7 +13,7 @@ use crate::planet::resources::ResourceManager;
 use crate::planet::Luna4Id;
 
 use common_game::components::planet::{PlanetAI, PlanetState, DummyPlanetState};
-use common_game::components::resource::{BasicResource, GenericResource, ComplexResource, AIPartner, Carbon};
+use common_game::components::resource::{BasicResource, GenericResource, ComplexResource};
 use common_game::components::resource::{Generator, Combinator};
 use common_game::components::rocket::Rocket;
 use common_game::components::sunray::Sunray;
@@ -285,7 +285,6 @@ impl PlanetAI for Luna4AI {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use common_game::components::resource::BasicResourceType;
     
     #[test]
     fn test_ai_creation() {

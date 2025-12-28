@@ -175,8 +175,6 @@ impl OperationalStats {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::thread;
-    use std::time::Duration;
     
     #[test]
     fn test_state_initialization() {

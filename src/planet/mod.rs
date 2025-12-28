@@ -18,9 +18,6 @@ pub use luna4::{Luna4, Luna4Id};
 // Internal re-exports (used within crate only)
 pub(crate) use state::{Luna4State, OperationalStats};
 pub(crate) use cycle::LunarPhase;
-pub(crate) use energy::{EnergyManager, EnergyStatus};
-pub(crate) use errors::Luna4Error;
-pub(crate) use resources::{ResourceManager, AvailableResources};
 
 // Re-export common types that might be needed by users of this crate
 pub use common_game::components::planet::{Planet, PlanetAI, PlanetType};

@@ -221,7 +221,6 @@ impl EnergyManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use common_game::components::planet::PlanetState;
     
     #[test]
     fn test_energy_manager_validation() {
