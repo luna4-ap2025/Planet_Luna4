@@ -9,7 +9,7 @@
 
 Every planet needs a **Luna4**.
 
-Luna4 is small, precious, and rich in resources. It does not fight—it **supplies**.  
+Luna4 is small, precious, and rich in resources. It does not fight, it **supplies**.  
 Always visible. Always monitored. Like a moon watching silently from orbit.
 
 Its behavior follows a **predictable 7-minute lunar cycle**, shifting through phases:
