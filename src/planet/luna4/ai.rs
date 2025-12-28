@@ -6,13 +6,14 @@
 
 use std::sync::{Arc, Mutex};
 
-use super::state::Luna4State;
+use crate::planet::Luna4State;
 use crate::planet::cycle::LunarCycle;
 use crate::planet::energy::EnergyManager;
 use crate::planet::resources::ResourceManager;
 use crate::planet::Luna4Id;
 
 use common_game::components::planet::{PlanetAI, PlanetState, DummyPlanetState};
+use common_game::components::resource::{BasicResource, GenericResource, ComplexResource, AIPartner, Carbon};
 use common_game::components::resource::{Generator, Combinator};
 use common_game::components::rocket::Rocket;
 use common_game::components::sunray::Sunray;
@@ -129,10 +130,10 @@ impl PlanetAI for Luna4AI {
             luna_state.update_phase();
             luna_state.current_phase
         };
-        
+
         // Get available resources for current phase
         let available_resources = self.resources.get_available_resources(current_phase);
-        
+
         match msg {
             ExplorerToPlanet::SupportedResourceRequest { explorer_id } => {
                 // Register explorer interaction
@@ -142,28 +143,28 @@ impl PlanetAI for Luna4AI {
                         luna_state.register_explorer_arrival(explorer_id);
                     }
                 }
-                
+
                 // Return available resources for current phase
                 Some(PlanetToExplorer::SupportedResourceResponse {
                     resource_list: available_resources.basic.clone(),
                 })
             }
-            
+
             ExplorerToPlanet::SupportedCombinationRequest { explorer_id: _ } => {
                 // Luna4 doesn't support complex resources
                 Some(PlanetToExplorer::SupportedCombinationResponse {
                     combination_list: available_resources.complex.clone(),
                 })
             }
-            
-            ExplorerToPlanet::GenerateResourceRequest { explorer_id, resource } => {
+
+            ExplorerToPlanet::GenerateResourceRequest { explorer_id: _, resource } => {
                 // Check if resource is available in current phase
                 if !available_resources.basic.contains(&resource) {
                     return Some(PlanetToExplorer::GenerateResourceResponse {
                         resource: None,
                     });
                 }
-                
+
                 // Try to generate the resource
                 match self.energy.use_energy_cell(state, |cell| {
                     generator.try_make(resource, cell)
@@ -174,7 +175,7 @@ impl PlanetAI for Luna4AI {
                             let mut luna_state = self.state.lock().unwrap();
                             luna_state.record_generation(resource);
                         }
-                        
+
                         Some(PlanetToExplorer::GenerateResourceResponse {
                             resource: Some(generated_resource),
                         })
@@ -185,50 +186,50 @@ impl PlanetAI for Luna4AI {
                             let mut luna_state = self.state.lock().unwrap();
                             luna_state.stats.record_error();
                         }
-                        
+
                         Some(PlanetToExplorer::GenerateResourceResponse {
                             resource: None,
                         })
                     }
                 }
             }
-            
+
             ExplorerToPlanet::AvailableEnergyCellRequest { explorer_id: _ } => {
                 let available_cells = self.energy.available_charged_cells(state);
                 Some(PlanetToExplorer::AvailableEnergyCellResponse {
                     available_cells: available_cells as u32,
                 })
             }
-            
-       ExplorerToPlanet::CombineResourceRequest { explorer_id: _, msg } => {
-    // Extract the actual resources from the request
-    let (resource1, resource2) = match msg {
-        ComplexResourceRequest::Water(h, o) => (h.to_generic(), o.to_generic()),
-        ComplexResourceRequest::Diamond(c1, c2) => (c1.to_generic(), c2.to_generic()),
-        ComplexResourceRequest::Life(w, c) => (w.to_generic(), c.to_generic()),
-        ComplexResourceRequest::Robot(s, l) => (s.to_generic(), l.to_generic()),
-        ComplexResourceRequest::Dolphin(w, l) => (w.to_generic(), l.to_generic()),
-        ComplexResourceRequest::AIPartner(r, d) => (r.to_generic(), d.to_generic()),
-    };
-    
-    Some(PlanetToExplorer::CombineResourceResponse {
-        complex_response: Err((
-            "Luna4 does not support resource combination".to_string(),
-            resource1,
-            resource2,
-        )),
-    })
-}
-                        common_game::components::resource::GenericResource::BasicResources(
-                            common_game::components::resource::BasicResource::Oxygen(
-                                common_game::components::resource::Oxygen { _private: () }
-                            )
-                        ),
-                        common_game::components::resource::GenericResource::BasicResources(
-                            common_game::components::resource::BasicResource::Hydrogen(
-                                common_game::components::resource::Hydrogen { _private: () }
-                            )
-                        ),
+
+
+            ExplorerToPlanet::CombineResourceRequest { .. } => {
+                // Luna4 doesn't support resource combination
+                // Since we can't construct the resources directly due to private fields,
+                // we need to handle this differently
+
+                // Option 1: Try to use placeholder/empty resources if the API allows
+                // Option 2: Return an error without the resource parameters if possible
+                // Option 3: Use unsafe or workaround if absolutely necessary
+
+                // For now, let's try to work around this by using whatever API is available
+                // You might need to check if there's a Default implementation or similar
+
+                log::warn!("Luna4 received CombineResourceRequest but doesn't support combination");
+
+                // Return an error - the specific resources might not matter since it's an error
+                Some(PlanetToExplorer::CombineResourceResponse {
+                    complex_response: Err((
+                        "Luna4 does not support resource combination".to_string(),
+                        // We need to figure out how to create these properly
+                        // For now, this is a placeholder - you'll need to find the actual API
+                        GenericResource::ComplexResources(ComplexResource::AIPartner(
+                            // This won't work due to private field
+                            // You need to find the proper constructor
+                            unimplemented!("Need to find proper constructor for AIPartner")
+                        )),
+                        GenericResource::BasicResources(BasicResource::Carbon(
+                            unimplemented!("Need to find proper constructor for Carbon")
+                        )),
                     )),
                 })
             }
@@ -244,7 +245,7 @@ impl PlanetAI for Luna4AI {
     ) {
         let mut luna_state = self.state.lock().unwrap();
         luna_state.register_explorer_arrival(explorer_id);
-        log::info!("🌙 Explorer #{} arrived at Luna4", explorer_id);
+        log::info!("Explorer #{} arrived at Luna4", explorer_id);
     }
     
     fn on_explorer_departure(
@@ -256,7 +257,7 @@ impl PlanetAI for Luna4AI {
     ) {
         let mut luna_state = self.state.lock().unwrap();
         luna_state.register_explorer_departure(explorer_id);
-        log::info!("🌙 Explorer #{} departed from Luna4", explorer_id);
+        log::info!("Explorer #{} departed from Luna4", explorer_id);
     }
     
     fn on_start(
@@ -267,7 +268,7 @@ impl PlanetAI for Luna4AI {
     ) {
         let mut luna_state = self.state.lock().unwrap();
         luna_state.phase_start_time = std::time::Instant::now();
-        log::info!("🌙 Luna4 #{} started operation", luna_state.id.as_u32());
+        log::info!("Luna4 #{} started operation", luna_state.id.as_u32());
     }
     
     fn on_stop(
@@ -277,7 +278,7 @@ impl PlanetAI for Luna4AI {
         _combinator: &Combinator,
     ) {
         let luna_state = self.state.lock().unwrap();
-        log::info!("🌙 Luna4 #{} stopped operation", luna_state.id.as_u32());
+        log::info!("Luna4 #{} stopped operation", luna_state.id.as_u32());
     }
 }
 

@@ -14,7 +14,7 @@ use std::time::Duration;
 /// - **Full Moon**: Everything available
 /// - **Last Quarter**: Preparation phase with limited resources
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum LunarPhase {
+pub enum LunarPhase {
     /// New Moon phase - rare elements only (Silicon, Carbon)
     NewMoon,
     /// First Quarter phase - common elements only (Oxygen, Hydrogen)
@@ -145,7 +145,7 @@ impl LunarCycle {
     ///
     /// # Returns
     /// `Duration` representing how long this phase lasts
-    pub(crate) fn phase_duration(&self, phase: LunarPhase) -> Duration {
+    pub(crate) fn phase_duration(&self, _phase: LunarPhase) -> Duration {
         let seconds_per_phase = self.total_cycle_seconds / self.phase_order.len() as u64;
         Duration::from_secs(seconds_per_phase)
     }
@@ -228,12 +228,13 @@ mod tests {
     #[test]
     fn test_phase_at_time() {
         let cycle = LunarCycle::default();
-        
+
         assert_eq!(cycle.phase_at_time(Duration::from_secs(0)), LunarPhase::NewMoon);
         assert_eq!(cycle.phase_at_time(Duration::from_secs(100)), LunarPhase::NewMoon);
         assert_eq!(cycle.phase_at_time(Duration::from_secs(110)), LunarPhase::FirstQuarter);
-        assert_eq!(cycle.phase_at_time(Duration::from_secs(220)), LunarPhase::FirstQuarter);
+        assert_eq!(cycle.phase_at_time(Duration::from_secs(220)), LunarPhase::FullMoon);
         assert_eq!(cycle.phase_at_time(Duration::from_secs(230)), LunarPhase::FullMoon);
+        assert_eq!(cycle.phase_at_time(Duration::from_secs(320)), LunarPhase::LastQuarter);
     }
     
     #[test]

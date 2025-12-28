@@ -1,8 +1,21 @@
 [package]
-name = "planet_luna4"
-version = "0.1.0"
-edition = "2024"
+name = "luna4"
+version = "2.0.0"
+edition = "2021"
+
+[lib]
+name = "luna4"
+path = "src/lib.rs"
 
 [dependencies]
-common-game = { git = "https://github.com/unitn-ap-2025/common.git"}
-crossbeam-channel = "0.5.15"
+common_game = {git = "https://github.com/unitn-ap-2025/common.git", subdir = "app/game", package = "common-game", version = "2.0.0"}
+crossbeam-channel = "0.5"
+log = "0.4"
+thiserror = "1.0"
+
+[dev-dependencies]
+tempfile = "3.4"
+
+[profile.release]
+lto = true
+codegen-units = 1
