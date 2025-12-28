@@ -228,12 +228,13 @@ mod tests {
     #[test]
     fn test_phase_at_time() {
         let cycle = LunarCycle::default();
-        
+
         assert_eq!(cycle.phase_at_time(Duration::from_secs(0)), LunarPhase::NewMoon);
         assert_eq!(cycle.phase_at_time(Duration::from_secs(100)), LunarPhase::NewMoon);
         assert_eq!(cycle.phase_at_time(Duration::from_secs(110)), LunarPhase::FirstQuarter);
-        assert_eq!(cycle.phase_at_time(Duration::from_secs(220)), LunarPhase::FirstQuarter);
+        assert_eq!(cycle.phase_at_time(Duration::from_secs(220)), LunarPhase::FullMoon);
         assert_eq!(cycle.phase_at_time(Duration::from_secs(230)), LunarPhase::FullMoon);
+        assert_eq!(cycle.phase_at_time(Duration::from_secs(320)), LunarPhase::LastQuarter);
     }
     
     #[test]

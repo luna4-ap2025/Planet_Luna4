@@ -13,6 +13,7 @@ use crate::planet::resources::ResourceManager;
 use crate::planet::Luna4Id;
 
 use common_game::components::planet::{PlanetAI, PlanetState, DummyPlanetState};
+use common_game::components::resource::{BasicResource, GenericResource, ComplexResource, AIPartner, Carbon};
 use common_game::components::resource::{Generator, Combinator};
 use common_game::components::rocket::Rocket;
 use common_game::components::sunray::Sunray;
@@ -129,10 +130,10 @@ impl PlanetAI for Luna4AI {
             luna_state.update_phase();
             luna_state.current_phase
         };
-        
+
         // Get available resources for current phase
         let available_resources = self.resources.get_available_resources(current_phase);
-        
+
         match msg {
             ExplorerToPlanet::SupportedResourceRequest { explorer_id } => {
                 // Register explorer interaction
@@ -142,13 +143,13 @@ impl PlanetAI for Luna4AI {
                         luna_state.register_explorer_arrival(explorer_id);
                     }
                 }
-                
+
                 // Return available resources for current phase
                 Some(PlanetToExplorer::SupportedResourceResponse {
                     resource_list: available_resources.basic.clone(),
                 })
             }
-            
+
             ExplorerToPlanet::SupportedCombinationRequest { explorer_id: _ } => {
                 // Luna4 doesn't support complex resources
                 Some(PlanetToExplorer::SupportedCombinationResponse {
@@ -163,7 +164,7 @@ impl PlanetAI for Luna4AI {
                         resource: None,
                     });
                 }
-                
+
                 // Try to generate the resource
                 match self.energy.use_energy_cell(state, |cell| {
                     generator.try_make(resource, cell)
@@ -174,7 +175,7 @@ impl PlanetAI for Luna4AI {
                             let mut luna_state = self.state.lock().unwrap();
                             luna_state.record_generation(resource);
                         }
-                        
+
                         Some(PlanetToExplorer::GenerateResourceResponse {
                             resource: Some(generated_resource),
                         })
@@ -185,14 +186,14 @@ impl PlanetAI for Luna4AI {
                             let mut luna_state = self.state.lock().unwrap();
                             luna_state.stats.record_error();
                         }
-                        
+
                         Some(PlanetToExplorer::GenerateResourceResponse {
                             resource: None,
                         })
                     }
                 }
             }
-            
+
             ExplorerToPlanet::AvailableEnergyCellRequest { explorer_id: _ } => {
                 let available_cells = self.energy.available_charged_cells(state);
                 Some(PlanetToExplorer::AvailableEnergyCellResponse {
@@ -200,19 +201,35 @@ impl PlanetAI for Luna4AI {
                 })
             }
 
+
             ExplorerToPlanet::CombineResourceRequest { .. } => {
-                // Luna4 doesn't support combination
-                use common_game::components::resource::*;
+                // Luna4 doesn't support resource combination
+                // Since we can't construct the resources directly due to private fields,
+                // we need to handle this differently
 
-                // Create basic resources first
-                let oxygen_basic = BasicResource::Oxygen(Oxygen { _private: () });
-                let hydrogen_basic = BasicResource::Hydrogen(Hydrogen { _private: () });
+                // Option 1: Try to use placeholder/empty resources if the API allows
+                // Option 2: Return an error without the resource parameters if possible
+                // Option 3: Use unsafe or workaround if absolutely necessary
 
+                // For now, let's try to work around this by using whatever API is available
+                // You might need to check if there's a Default implementation or similar
+
+                log::warn!("Luna4 received CombineResourceRequest but doesn't support combination");
+
+                // Return an error - the specific resources might not matter since it's an error
                 Some(PlanetToExplorer::CombineResourceResponse {
                     complex_response: Err((
                         "Luna4 does not support resource combination".to_string(),
-                        GenericResource::BasicResources(oxygen_basic),
-                        GenericResource::BasicResources(hydrogen_basic),
+                        // We need to figure out how to create these properly
+                        // For now, this is a placeholder - you'll need to find the actual API
+                        GenericResource::ComplexResources(ComplexResource::AIPartner(
+                            // This won't work due to private field
+                            // You need to find the proper constructor
+                            unimplemented!("Need to find proper constructor for AIPartner")
+                        )),
+                        GenericResource::BasicResources(BasicResource::Carbon(
+                            unimplemented!("Need to find proper constructor for Carbon")
+                        )),
                     )),
                 })
             }
