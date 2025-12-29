@@ -4,6 +4,7 @@ import os
 import requests
 
 WEBHOOK_OBSERVATORY = os.environ["DISCORD_OBSERVATORY_WEBHOOK"]
+STATE_FILE = "scripts/observatory_state.json"
 
 PHASES = [
     {
@@ -35,11 +36,18 @@ PHASES = [
 CYCLE_DURATION = 420
 PHASE_DURATION = 105
 
+# ---- Load state ----
+if os.path.exists(STATE_FILE):
+    with open(STATE_FILE, "r") as f:
+        state = json.load(f)
+else:
+    state = {}
+
+# ---- Compute phase ----
 now = int(time.time())
 cycle = now // CYCLE_DURATION
 phase_index = (now % CYCLE_DURATION) // PHASE_DURATION
 phase = PHASES[int(phase_index)]
-
 time_remaining = PHASE_DURATION - (now % PHASE_DURATION)
 
 embed = {
@@ -53,22 +61,27 @@ embed = {
     ),
     "color": phase["color"],
     "footer": {
-        "text": "Luna4 • The moon that feeds your world"
+        "text": "Luna4 🌙 The moon that feeds your world"
     }
 }
 
-payload = {
-    "embeds": [embed]
-}
+payload = {"embeds": [embed]}
 
-# --- Edit last message if it exists ---
-history = requests.get(f"{WEBHOOK_OBSERVATORY}/messages?limit=1").json()
-
-if history:
-    message_id = history[0]["id"]
+# ---- Post or edit ----
+if "message_id" in state:
+    # Edit existing message
     requests.patch(
-        f"{WEBHOOK_OBSERVATORY}/messages/{message_id}",
+        f"{WEBHOOK_OBSERVATORY}/messages/{state['message_id']}",
         json=payload
     )
 else:
-    requests.post(WEBHOOK_OBSERVATORY, json=payload)
+    # Create message and save ID
+    response = requests.post(
+        WEBHOOK_OBSERVATORY + "?wait=true",
+        json=payload
+    ).json()
+
+    state["message_id"] = response["id"]
+
+    with open(STATE_FILE, "w") as f:
+        json.dump(state, f)
