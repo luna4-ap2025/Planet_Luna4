@@ -32,4 +32,16 @@ jobs:
       - name: Update Observatory
         env:
           DISCORD_OBSERVATORY_WEBHOOK: ${{ secrets.DISCORD_OBSERVATORY_WEBHOOK }}
-        run: python scripts/luna4_observatory.py
+          LOGS_WEBHOOK: ${{ secrets.LOGS_WEBHOOK }}
+          run: |
+            import sys
+            sys.path.append("scripts")
+            from luna4_discord_post import post_observatory, log_darkside
+
+            # EXAMPLE FOR NOW: waiting for cycles logging...
+            
+            phase = "🌑 New Moon"
+            cycle = 42
+            resources = ["Carbon"]
+            post_observatory(phase, cycle, resources)
+            log_darkside(f"Observatory cycle {cycle} posted successfully")
