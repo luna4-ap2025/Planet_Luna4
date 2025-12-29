@@ -1,0 +1,28 @@
+name: Luna4 Future Orbits
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  experiments:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - run: pip install requests
+      - name: Post Experimental Release
+        env:
+          FUTURE_WEBHOOK: ${{ secrets.FUTURE_WEBHOOK }}
+        run: |
+          import os, json
+          from luna4_discord_post import post_experiment
+          
+          with open(os.environ['GITHUB_EVENT_PATH']) as f:
+              event = json.load(f)
+          tag = event["release"]["tag_name"]
+          name = event["release"]["name"] or ""
+          url = event["release"]["html_url"]
+          post_experiment(tag, name, url)
