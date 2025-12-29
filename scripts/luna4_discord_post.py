@@ -19,8 +19,34 @@ def log_darkside(message):
     post_to_discord("LOGS_WEBHOOK", f"🛰 {timestamp} | {message}")
 
 def post_observatory(phase, cycle, resources):
-    msg = f"🌑 Luna4 Observatory | Cycle {cycle} | Phase {phase} | Resources: {', '.join(resources)}"
-    post_to_discord("DISCORD_OBSERVATORY_WEBHOOK", msg)
+    webhook_url = os.environ.get("DISCORD_OBSERVATORY_WEBHOOK")
+    message_id = os.environ.get("OBSERVATORY_MESSAGE_ID")
+
+    if not webhook_url:
+        print("No DISCORD_OBSERVATORY_WEBHOOK found")
+        return
+
+    content = (
+        f"🌑 **Luna4 Observatory**\n"
+        f"━━━━━━━━━━━━━━\n"
+        f"**Cycle:** {cycle}\n"
+        f"**Phase:** {phase}\n"
+        f"**Accessible Resources:** {', '.join(resources)}\n\n"
+        f"_The surface remains under continuous observation._"
+    )
+
+    payload = {"content": content}
+
+    try:
+        if message_id:
+            edit_url = f"{webhook_url}/messages/{message_id}"
+            requests.patch(edit_url, json=payload)
+            print("Updated Observatory message")
+        else:
+            requests.post(webhook_url, json=payload)
+            print("Posted new Observatory message")
+    except Exception as e:
+        print(f"Error updating Observatory: {e}")
 
 def post_changelog(tag, name, body):
     msg = f"🌒 Cycle Adjustment Detected {tag} — \"{name}\""
