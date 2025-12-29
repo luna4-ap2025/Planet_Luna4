@@ -21,7 +21,7 @@ jobs:
 
       - name: Post release to Discord
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_CHANGELOG_WEBHOOK }}
+          DISCORD_CHANGELOG_WEBHOOK: ${{ secrets.DISCORD_CHANGELOG_WEBHOOK }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
         run: |
           import json
@@ -47,5 +47,5 @@ jobs:
               msg += f" • {body.replace(chr(10),' • ')}"
 
           # Send to Discord
-          webhook_url = os.environ["DISCORD_WEBHOOK_URL"]
+          webhook_url = os.environ["DISCORD_CHANGELOG_WEBHOOK"]
           requests.post(webhook_url, json={"content": msg})
