@@ -35,6 +35,7 @@ jobs:
       - name: Update Observatory
         env:
           DISCORD_OBSERVATORY_WEBHOOK: ${{ secrets.DISCORD_OBSERVATORY_WEBHOOK }}
+          OBSERVATORY_MESSAGE_ID: ${{ secrets.OBSERVATORY_MESSAGE_ID }}
           LOGS_WEBHOOK: ${{ secrets.LOGS_WEBHOOK }}
         run: |
           python - <<'EOF'
