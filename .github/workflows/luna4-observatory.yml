@@ -2,30 +2,34 @@ name: Luna4 Observatory
 
 on:
   schedule:
-    - cron: "*/1 * * * *"  # every minute for testing
+    - cron: "*/1 * * * *"
   workflow_dispatch:
 
 jobs:
-  observatory:
+  update-observatory:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
-      - run: pip install requests
-      - name: Post Observatory
+          python-version: "3.11"
+     
+      - name: Commit observatory state
+        run: |
+          git config user.name "luna4-observatory"
+          git config user.email "observatory@luna4"
+          git add scripts/observatory_state.json
+          git commit -m "🔭 Update observatory state" || echo "No changes"
+          git push
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Update Observatory
         env:
           DISCORD_OBSERVATORY_WEBHOOK: ${{ secrets.DISCORD_OBSERVATORY_WEBHOOK }}
-          LOGS_WEBHOOK: ${{ secrets.LOGS_WEBHOOK }}
-        run: |
-          import sys
-          sys.path.append("scripts")
-          from luna4_discord_post import post_observatory, log_darkside
-          
-          # Example data, replace with your real Luna4 logic
-          phase = "🌑 New Moon"
-          cycle = 42
-          resources = ["Carbon"]
-          post_observatory(phase, cycle, resources)
-          log_darkside(f"Observatory cycle {cycle} posted successfully")
+        run: python scripts/luna4_observatory.py
