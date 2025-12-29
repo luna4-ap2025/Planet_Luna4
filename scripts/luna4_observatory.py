@@ -62,12 +62,12 @@ payload = {
 }
 
 # --- Edit last message if it exists ---
-history = requests.get(f"{WEBHOOK_URL}/messages?limit=1").json()
+history = requests.get(f"{WEBHOOK_OBSERVATORY}/messages?limit=1").json()
 
 if history:
     message_id = history[0]["id"]
     requests.patch(
-        f"{WEBHOOK_URL}/messages/{message_id}",
+        f"{WEBHOOK_OBSERVATORY}/messages/{message_id}",
         json=payload
     )
 else:
