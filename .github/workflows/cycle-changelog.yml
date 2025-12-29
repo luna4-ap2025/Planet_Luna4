@@ -19,33 +19,21 @@ jobs:
       - name: Install requests
         run: pip install requests
 
-      - name: Post release to Discord
+      - name: Post Changelog
         env:
           DISCORD_CHANGELOG_WEBHOOK: ${{ secrets.DISCORD_CHANGELOG_WEBHOOK }}
+          LOGS_WEBHOOK: ${{ secrets.LOGS_WEBHOOK }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
         run: |
-          import json
-          import os
-          import requests
+          import sys, json
+          sys.path.append("scripts")
+          from luna4_discord_post import post_changelog, log_darkside
 
-          # Load release info
           with open(os.environ["GITHUB_EVENT_PATH"]) as f:
-              event = json.load(f)
-
-          version = event["release"]["tag_name"]
+            event = json.load(f)
+          tag = event["release"]["tag_name"]
           name = event["release"]["name"] or ""
           body = event["release"]["body"] or ""
+          post_changelog(tag, name, body)
+          log_darkside(f"Changelog {tag} posted successfully")
 
-          # Optional codename, pick first line if present
-          codename = name.strip()
-
-          # Build message
-          msg = f"🌒 Cycle Adjustment Detected {version}"
-          if codename:
-              msg += f' — "{codename}"'
-          if body:
-              msg += f" • {body.replace(chr(10),' • ')}"
-
-          # Send to Discord
-          webhook_url = os.environ["DISCORD_CHANGELOG_WEBHOOK"]
-          requests.post(webhook_url, json={"content": msg})
