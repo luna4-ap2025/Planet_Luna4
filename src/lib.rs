@@ -34,11 +34,11 @@ pub fn create_planet(
     rx_orchestrator: crossbeam_channel::Receiver<common_game::protocols::orchestrator_planet::OrchestratorToPlanet>,
     tx_orchestrator: crossbeam_channel::Sender<common_game::protocols::orchestrator_planet::PlanetToOrchestrator>,
     rx_explorer: crossbeam_channel::Receiver<common_game::protocols::planet_explorer::ExplorerToPlanet>,
-) -> Result<common_game::components::planet::Planet, String> {
+) -> Result<planet::Planet, String> {
     use logging::log_planet_event;
     use common_game::logging::{EventType, Channel};
     
-    let planet_id = planet::Luna4Id::new(id);
+    let planet_id = Luna4Id::new(id);
     
     // Log initialization using structured logging
 log_planet_event(
@@ -50,7 +50,7 @@ log_planet_event(
 );
     
     // Create Luna4 instance
-    let luna4 = match planet::Luna4::new(id) {
+    let luna4 = match Luna4::new(id) {
         Ok(luna) => luna,
         Err(e) => return Err(format!("Failed to create Luna4: {e}")),
     };
@@ -77,7 +77,8 @@ log_planet_event(
 mod tests {
     use super::*;
     use crossbeam_channel::unbounded;
-    
+
+    //noinspection ALL
     #[test]
     fn test_create_planet_function_exists() {
         // Just verify the function signature compiles

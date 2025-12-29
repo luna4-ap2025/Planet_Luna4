@@ -108,6 +108,7 @@ impl Luna4State {
     ///
     /// # Returns
     /// Count of explorers currently on the planet
+    #[allow(dead_code)]
     pub(crate) fn explorer_count(&self) -> usize {
         self.present_explorers.len()
     }
@@ -116,6 +117,7 @@ impl Luna4State {
     ///
     /// # Returns
     /// `Duration` since current phase started
+    #[allow(dead_code)]
     pub(crate) fn elapsed_in_current_phase(&self) -> Duration {
         self.phase_start_time.elapsed()
     }
@@ -124,6 +126,7 @@ impl Luna4State {
     ///
     /// # Returns
     /// Formatted string summarizing current state
+    #[allow(dead_code)]
     pub(crate) fn display_summary(&self) -> String {
         let phase_progress = self.phase_start_time.elapsed();
         let explorers = self.explorer_count();

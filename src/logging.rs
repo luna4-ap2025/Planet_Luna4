@@ -115,7 +115,8 @@ pub fn log_explorer_interaction(
 }
 
 /// Logs operational statistics for monitoring.
-pub fn log_operational_statistics(
+#[allow(dead_code)]
+pub(crate) fn log_operational_statistics(
     planet_id: Luna4Id,
     stats: &OperationalStats,
     energy_charged: usize,

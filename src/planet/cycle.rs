@@ -43,6 +43,8 @@ impl LunarPhase {
     ///
     /// # Returns
     /// String slice with the phase description
+
+    #[allow(dead_code)]
     pub(crate) fn description(&self) -> &'static str {
         match self {
             LunarPhase::NewMoon => "Rare elements in the dark",
@@ -60,6 +62,7 @@ impl LunarPhase {
     /// # Note
     /// Luna4 has a 7-minute (420 second) total cycle divided equally among 4 phases.
     /// Each phase therefore lasts 105 seconds (1 minute 45 seconds).
+    #[allow(dead_code)]
     pub(crate) fn duration_seconds(&self) -> u64 {
         105 // 420 seconds total / 4 phases = 105 seconds per phase
     }
@@ -68,6 +71,7 @@ impl LunarPhase {
     ///
     /// # Returns
     /// `Duration` representing how long this phase lasts
+    #[allow(dead_code)]
     pub(crate) fn duration(&self) -> Duration {
         Duration::from_secs(self.duration_seconds())
     }
@@ -109,6 +113,7 @@ impl LunarCycle {
     ///
     /// # Returns
     /// New `LunarCycle` instance
+    #[allow(dead_code)]
     pub(crate) fn new(total_seconds: u64) -> Self {
         Self {
             total_cycle_seconds: total_seconds,
@@ -157,6 +162,7 @@ impl LunarCycle {
     ///
     /// # Returns
     /// The lunar phase that should be active at this time
+    #[allow(dead_code)]
     pub(crate) fn phase_at_time(&self, elapsed: Duration) -> LunarPhase {
         let total_secs = elapsed.as_secs();
         let seconds_per_phase = self.total_cycle_seconds / self.phase_order.len() as u64;
@@ -172,6 +178,7 @@ impl LunarCycle {
     ///
     /// # Returns
     /// `Duration` until the next phase begins
+    #[allow(dead_code)]
     pub(crate) fn time_until_next_phase(&self, elapsed_in_current_phase: Duration) -> Duration {
         let seconds_per_phase = self.total_cycle_seconds / self.phase_order.len() as u64;
         let current_phase_duration = Duration::from_secs(seconds_per_phase);
@@ -190,6 +197,7 @@ impl LunarCycle {
     ///
     /// # Returns
     /// Progress as a floating-point value between 0.0 and 1.0
+    #[allow(dead_code)]
     pub(crate) fn phase_progress(&self, elapsed_in_current_phase: Duration) -> f32 {
         let seconds_per_phase = self.total_cycle_seconds / self.phase_order.len() as u64;
         let elapsed_secs = elapsed_in_current_phase.as_secs_f32();
