@@ -8,6 +8,7 @@
 
 pub mod planet;
 pub mod logging;
+mod planet_integration_test; //place-holder, remove later
 
 // Re-export the main entry point
 pub use planet::{Luna4, Luna4Id};
