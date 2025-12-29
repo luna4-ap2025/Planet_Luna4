@@ -1,0 +1,51 @@
+name: Luna4 Cycle Changelog
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  post-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Changelog
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Post release to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_CHANGELOG_WEBHOOK }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: |
+          import json
+          import os
+          import requests
+
+          # Load release info
+          with open(os.environ["GITHUB_EVENT_PATH"]) as f:
+              event = json.load(f)
+
+          version = event["release"]["tag_name"]
+          name = event["release"]["name"] or ""
+          body = event["release"]["body"] or ""
+
+          # Optional codename, pick first line if present
+          codename = name.strip()
+
+          # Build message
+          msg = f"🌒 Cycle Adjustment Detected {version}"
+          if codename:
+              msg += f' — "{codename}"'
+          if body:
+              msg += f" • {body.replace(chr(10),' • ')}"
+
+          # Send to Discord
+          webhook_url = os.environ["DISCORD_WEBHOOK_URL"]
+          requests.post(webhook_url, json={"content": msg})
