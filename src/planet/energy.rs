@@ -15,6 +15,7 @@ const LUNA4_ENERGY_CELL_COUNT: usize = 5;
 ///
 /// This struct provides a snapshot view of energy cell status
 /// for monitoring and logging purposes.
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub(crate) struct EnergyStatus {
     /// Total number of energy cells (always 5 for Luna4)
@@ -36,6 +37,7 @@ impl EnergyStatus {
     ///
     /// # Returns
     /// New `EnergyStatus` instance
+    #[allow(dead_code)]
     pub(crate) fn new(total_cells: usize, charged_cells: usize) -> Self {
         let discharged_cells = total_cells.saturating_sub(charged_cells);
         let percentage_charged = if total_cells > 0 {
@@ -56,6 +58,7 @@ impl EnergyStatus {
     ///
     /// # Returns
     /// Formatted string showing energy cell status
+    #[allow(dead_code)]
     pub(crate) fn display_summary(&self) -> String {
         format!(
             "Energy: {}/{} cells charged ({:.1}%)",
@@ -179,6 +182,7 @@ impl EnergyManager {
     ///
     /// # Returns
     /// Number of discharged cells (0-5)
+    #[allow(dead_code)]
     pub(crate) fn available_discharged_cells(&self, state: &PlanetState) -> usize {
         (0..self.cell_count)
             .filter(|&i| !state.cell(i).is_charged())
@@ -193,6 +197,7 @@ impl EnergyManager {
     ///
     /// # Returns
     /// `true` if at least `required_cells` are charged, `false` otherwise
+    #[allow(dead_code)]
     pub(crate) fn has_sufficient_energy(&self, state: &PlanetState, required_cells: usize) -> bool {
         self.available_charged_cells(state) >= required_cells
     }
@@ -204,6 +209,7 @@ impl EnergyManager {
     ///
     /// # Returns
     /// Detailed energy status
+    #[allow(dead_code)]
     pub(crate) fn get_energy_status(&self, state: &PlanetState) -> EnergyStatus {
         let charged = self.available_charged_cells(state);
         EnergyStatus::new(self.cell_count, charged)
@@ -213,6 +219,7 @@ impl EnergyManager {
     ///
     /// # Returns
     /// Number of energy cells
+    #[allow(dead_code)]
     pub(crate) fn total_cells(&self) -> usize {
         self.cell_count
     }

@@ -7,6 +7,8 @@
 ///
 /// This struct aggregates various metrics about Luna4's operation
 /// that can be used for monitoring, debugging, or performance analysis.
+
+#[allow(dead_code)]
 #[derive(Debug, Clone, Default)]
 pub(crate) struct Luna4Stats {
     /// Number of successful resource generations
@@ -26,26 +28,31 @@ impl Luna4Stats {
     ///
     /// # Returns
     /// New `Luna4Stats` instance
+    #[allow(dead_code)]
     pub(crate) fn new() -> Self {
         Self::default()
     }
     
     /// Records a successful resource generation
+    #[allow(dead_code)]
     pub(crate) fn record_successful_generation(&mut self) {
         self.successful_generations += 1;
     }
     
     /// Records a failed resource generation
+    #[allow(dead_code)]
     pub(crate) fn record_failed_generation(&mut self) {
         self.failed_generations += 1;
     }
     
     /// Records reception of a sunray
+    #[allow(dead_code)]
     pub(crate) fn record_sunray_received(&mut self) {
         self.sunrays_received += 1;
     }
     
     /// Records processing of an explorer message
+    #[allow(dead_code)]
     pub(crate) fn record_explorer_message_processed(&mut self) {
         self.explorer_messages_processed += 1;
     }
@@ -54,6 +61,7 @@ impl Luna4Stats {
     ///
     /// # Arguments
     /// * `microseconds` - Processing time to add in microseconds
+    #[allow(dead_code)]
     pub(crate) fn add_processing_time(&mut self, microseconds: u64) {
         self.total_processing_time_us += microseconds;
     }
@@ -62,6 +70,7 @@ impl Luna4Stats {
     ///
     /// # Returns
     /// Success rate as a percentage (0.0 to 100.0), or 0.0 if no attempts
+    #[allow(dead_code)]
     pub(crate) fn generation_success_rate(&self) -> f32 {
         let total_attempts = self.successful_generations + self.failed_generations;
         if total_attempts == 0 {
@@ -74,6 +83,7 @@ impl Luna4Stats {
     ///
     /// # Returns
     /// Formatted string summarizing the statistics
+    #[allow(dead_code)]
     pub(crate) fn display_summary(&self) -> String {
         format!(
             "Stats: {} successful / {} failed generations ({:.1}% success), {} sunrays, {} explorer messages",

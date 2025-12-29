@@ -12,7 +12,7 @@ use crate::planet::resources::ResourceManager;
 use crate::planet::Luna4Id;
 
 use common_game::components::planet::{PlanetAI, PlanetState, DummyPlanetState};
-use common_game::components::resource::{BasicResource, GenericResource, ComplexResource, ComplexResourceRequest};
+use common_game::components::resource::{ComplexResourceRequest};
 use common_game::components::resource::{Generator, Combinator};
 use common_game::components::rocket::Rocket;
 use common_game::components::sunray::Sunray;

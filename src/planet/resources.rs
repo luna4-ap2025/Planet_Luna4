@@ -26,6 +26,7 @@ impl AvailableResources {
     ///
     /// # Returns
     /// `AvailableResources` with empty basic and complex sets
+    #[allow(dead_code)]
     pub(crate) fn empty() -> Self {
         Self {
             basic: HashSet::new(),
@@ -161,6 +162,7 @@ impl ResourceManager {
     ///
     /// # Returns
     /// `true` if the resource can be generated in this phase, `false` otherwise
+    #[allow(dead_code)]
     pub(crate) fn is_basic_resource_available(
         &self,
         phase: LunarPhase,
@@ -176,6 +178,7 @@ impl ResourceManager {
     ///
     /// # Returns
     /// Clone of the set of available basic resources
+    #[allow(dead_code)]
     pub(crate) fn get_available_basic_resources(
         &self,
         phase: LunarPhase,
@@ -190,6 +193,7 @@ impl ResourceManager {
     ///
     /// # Returns
     /// Formatted string describing the phase and available resources
+    #[allow(dead_code)]
     pub(crate) fn get_phase_description(&self, phase: LunarPhase) -> String {
         let resources = self.get_available_resources(phase);
         let resource_list: Vec<String> = resources

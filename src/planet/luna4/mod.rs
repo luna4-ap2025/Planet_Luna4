@@ -4,6 +4,7 @@
 //! the main Luna4 struct, unique identifiers, and AI implementation.
 
 mod ai;
+mod stats;
 
 pub(crate) use ai::Luna4AI;
 
@@ -21,7 +22,7 @@ use common_game::utils::ID;
 
 /// Unique identifier for Luna4 planets
 ///
-/// This newtype wraps the raw `ID` (u32) to provide type safety
+/// This new type wraps the raw `ID` (u32) to provide type safety
 /// and prevent confusion with other entity identifiers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Luna4Id(ID);
