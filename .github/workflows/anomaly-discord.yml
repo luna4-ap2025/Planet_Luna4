@@ -1,0 +1,19 @@
+name: 🌑 Luna4 – Anomaly Relay
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send anomaly to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_ANOMALY_WEBHOOK }}
+        run: |
+          curl -X POST "$WEBHOOK" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "content": "🌑 **ANOMALY RELAY ACTIVATED**\n\n📡 **Transmission:** `${{ github.event.issue.title }}`\n🛰️ **Filed by:** `${{ github.event.issue.user.login }}`\n🔗 **Mission Log:** ${{ github.event.issue.html_url }}"
+          }'

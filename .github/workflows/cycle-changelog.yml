@@ -1,0 +1,39 @@
+name: Luna4 Cycle Changelog
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  post-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Changelog
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Post Changelog
+        env:
+          DISCORD_CHANGELOG_WEBHOOK: ${{ secrets.DISCORD_CHANGELOG_WEBHOOK }}
+          LOGS_WEBHOOK: ${{ secrets.LOGS_WEBHOOK }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: |
+          import sys, json
+          sys.path.append("scripts")
+          from luna4_discord_post import post_changelog, log_darkside
+
+          with open(os.environ["GITHUB_EVENT_PATH"]) as f:
+            event = json.load(f)
+          tag = event["release"]["tag_name"]
+          name = event["release"]["name"] or ""
+          body = event["release"]["body"] or ""
+          post_changelog(tag, name, body)
+          log_darkside(f"Changelog {tag} posted successfully")
+
