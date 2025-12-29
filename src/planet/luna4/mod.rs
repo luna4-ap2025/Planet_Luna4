@@ -9,7 +9,6 @@ pub(crate) use ai::Luna4AI;
 
 use crossbeam_channel::{Receiver, Sender};
 
-use crate::planet::cycle::LunarCycle;
 use crate::planet::energy::EnergyManager;
 use crate::planet::errors::Luna4Error;
 use crate::planet::resources::ResourceManager;
@@ -75,8 +74,6 @@ pub struct Luna4 {
     energy: EnergyManager,
     /// Resource management system
     resources: ResourceManager,
-    /// Lunar cycle tracker
-    cycle: LunarCycle,
 }
 
 impl Luna4 {
@@ -94,13 +91,11 @@ impl Luna4 {
         let id = Luna4Id::new(id);
         let energy = EnergyManager::new(5)?; // Luna4 has exactly 5 energy cells
         let resources = ResourceManager::new();
-        let cycle = LunarCycle::default();
 
         Ok(Self {
             id,
             energy,
-            resources,
-            cycle,
+            resources
         })
     }
 
@@ -140,8 +135,7 @@ impl Luna4 {
         let ai = Box::new(Luna4AI::new(
             self.id,
             self.energy,
-            self.resources,
-            self.cycle,
+            self.resources
         ));
 
         Planet::new(

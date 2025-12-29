@@ -7,13 +7,12 @@
 use std::sync::{Arc, Mutex};
 
 use crate::planet::Luna4State;
-use crate::planet::cycle::LunarCycle;
 use crate::planet::energy::EnergyManager;
 use crate::planet::resources::ResourceManager;
 use crate::planet::Luna4Id;
 
 use common_game::components::planet::{PlanetAI, PlanetState, DummyPlanetState};
-use common_game::components::resource::{BasicResource, GenericResource, ComplexResource};
+use common_game::components::resource::{BasicResource, GenericResource, ComplexResource, ComplexResourceRequest};
 use common_game::components::resource::{Generator, Combinator};
 use common_game::components::rocket::Rocket;
 use common_game::components::sunray::Sunray;
@@ -31,9 +30,7 @@ pub(crate) struct Luna4AI {
     /// Energy management
     energy: EnergyManager,
     /// Resource management
-    resources: ResourceManager,
-    /// Lunar cycle tracking
-    cycle: LunarCycle,
+    resources: ResourceManager
 }
 
 impl Luna4AI {
@@ -50,14 +47,12 @@ impl Luna4AI {
     pub(crate) fn new(
         id: Luna4Id,
         energy: EnergyManager,
-        resources: ResourceManager,
-        cycle: LunarCycle,
+        resources: ResourceManager
     ) -> Self {
         Self {
             state: Arc::new(Mutex::new(Luna4State::new(id.as_u32()))),
             energy,
-            resources,
-            cycle,
+            resources
         }
     }
 }
@@ -202,7 +197,7 @@ impl PlanetAI for Luna4AI {
             }
 
 
-            ExplorerToPlanet::CombineResourceRequest { .. } => {
+            ExplorerToPlanet::CombineResourceRequest { explorer_id : _, msg  } => {
                 // Luna4 doesn't support resource combination
                 // Since we can't construct the resources directly due to private fields,
                 // we need to handle this differently
@@ -215,21 +210,20 @@ impl PlanetAI for Luna4AI {
                 // You might need to check if there's a Default implementation or similar
 
                 log::warn!("Luna4 received CombineResourceRequest but doesn't support combination");
-
+                let (lhs, rhs) = match msg {
+                    ComplexResourceRequest::Water(lhs, rhs) => (lhs.to_generic(), rhs.to_generic()),
+                    ComplexResourceRequest::Diamond(lhs, rhs) => (lhs.to_generic(), rhs.to_generic()),
+                    ComplexResourceRequest::Life(lhs, rhs) => (lhs.to_generic(), rhs.to_generic()),
+                    ComplexResourceRequest::Robot(lhs, rhs) => (lhs.to_generic(), rhs.to_generic()),
+                    ComplexResourceRequest::Dolphin(lhs, rhs) => (lhs.to_generic(), rhs.to_generic()),
+                    ComplexResourceRequest::AIPartner(lhs, rhs) => (lhs.to_generic(), rhs.to_generic()),
+                };
                 // Return an error - the specific resources might not matter since it's an error
                 Some(PlanetToExplorer::CombineResourceResponse {
                     complex_response: Err((
                         "Luna4 does not support resource combination".to_string(),
-                        // We need to figure out how to create these properly
-                        // For now, this is a placeholder - you'll need to find the actual API
-                        GenericResource::ComplexResources(ComplexResource::AIPartner(
-                            // This won't work due to private field
-                            // You need to find the proper constructor
-                            unimplemented!("Need to find proper constructor for AIPartner")
-                        )),
-                        GenericResource::BasicResources(BasicResource::Carbon(
-                            unimplemented!("Need to find proper constructor for Carbon")
-                        )),
+                        lhs,
+                        rhs
                     )),
                 })
             }
@@ -291,9 +285,8 @@ mod tests {
         let id = Luna4Id::new(1);
         let energy = EnergyManager::new(5).unwrap();
         let resources = ResourceManager::new();
-        let cycle = LunarCycle::default();
         
-        let ai = Luna4AI::new(id, energy, resources, cycle);
+        let ai = Luna4AI::new(id, energy, resources);
         
         // Should compile and create without panicking
         let _ = ai;
