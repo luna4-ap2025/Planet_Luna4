@@ -18,6 +18,15 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Commit observatory state
+        run: |
+          git config user.name "luna4-observatory"
+          git config user.email "observatory@luna4"
+          git add scripts/observatory_state.json
+          git commit -m "🔭 Update observatory state" || echo "No changes"
+          git push
+
+
       - name: Install dependencies
         run: pip install requests
 
