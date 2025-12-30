@@ -134,6 +134,8 @@ if LAST_UPDATE and now - LAST_UPDATE > CYCLE_DURATION:
 WEBHOOK_OBSERVATORY = os.environ["DISCORD_OBSERVATORY_WEBHOOK"]
 MESSAGE_ID = os.environ["OBSERVATORY_MESSAGE_ID"]
 
+payload = {"embeds": [embed]}  # use the embed, not plain text
+
 requests.patch(
     f"{WEBHOOK_OBSERVATORY}/messages/{MESSAGE_ID}",
     json={"content": content}
