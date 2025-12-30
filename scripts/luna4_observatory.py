@@ -122,7 +122,6 @@ Phase: **{phase['name']}**
 📡 *Observatory Status:* Stable
 🕰 *Last updated:* {timestamp}
 """,
-    "color": phase["color"],  # if you have a color per phase
     "footer": {"text": "⋆⁺₊⋆ ☾⋆⁺₊⋆  Luna4 watches. It always does.  ⋆⁺₊⋆ ☾⋆⁺₊⋆"}
 }
 
