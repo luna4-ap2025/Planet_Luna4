@@ -86,6 +86,36 @@ fn charge_cells(
     }
 }
 
+fn new_moon_resources() -> std::collections::HashSet<BasicResourceType> {
+    use BasicResourceType::*;
+    [Carbon].into_iter().collect()
+}
+
+fn first_quarter_resources() -> std::collections::HashSet<BasicResourceType> {
+    use BasicResourceType::*;
+    [Hydrogen, Oxygen].into_iter().collect()
+}
+
+fn full_moon_resources() -> std::collections::HashSet<BasicResourceType> {
+    use BasicResourceType::*;
+    [Carbon, Hydrogen, Oxygen, Silicon].into_iter().collect()
+}
+
+fn last_quarter_resources() -> std::collections::HashSet<BasicResourceType> {
+    use BasicResourceType::*;
+    [Oxygen, Silicon].into_iter().collect()
+}
+
+fn expected_resources_for_phase(i : u32) -> std::collections::HashSet<BasicResourceType> {
+    match i {
+        0 => new_moon_resources(),
+        1 => first_quarter_resources(),
+        2 => full_moon_resources(),
+        3 => last_quarter_resources(),
+        _ => panic!("{}", format!("Unexpected phase {}", i)),
+    }
+}
+
 // ============================================================================
 // Tests: Planet State & Configuration
 // ============================================================================
@@ -137,8 +167,7 @@ fn test_explorer_capability_queries() {
         .unwrap();
     match rx_expl.recv_timeout(Duration::from_millis(200)) {
         Ok(PlanetToExplorer::SupportedResourceResponse { resource_list }) => {
-            assert_eq!(resource_list.len(), 4);
-            assert!(resource_list.contains(&BasicResourceType::Oxygen));
+            assert!(resource_list.len() > 0);
         }
         _ => panic!("Expected SupportedResourceResponse"),
     }
@@ -490,5 +519,64 @@ fn test_availability_query_after_charging() {
             assert_eq!(available_cells, 2);
         }
         _ => panic!("Expected AvailableEnergyCellResponse"),
+    }
+}
+
+
+// ============================================================================
+// Tests: Resource Generation in the cycle
+// ============================================================================
+
+/// **Scenario:** Explorer requests resource every 105 seconds
+/// **Validates:** Planet returns the resources for the different phases
+#[test]
+fn test_lunar_phases() {
+    let (tx_orch, rx_orch, tx_expl, _) = setup_test_planet();
+    let explorer_id = 42;
+    let rx_expl = register_explorer(explorer_id, &tx_orch, &rx_orch);
+
+    for i in 0..4 {
+        charge_cells(4, &tx_orch, &rx_orch);
+        // Ask supported resources
+        tx_expl
+            .send(ExplorerToPlanet::SupportedResourceRequest { explorer_id })
+            .unwrap();
+
+        let available = match rx_expl.recv_timeout(Duration::from_millis(200)) {
+            Ok(PlanetToExplorer::SupportedResourceResponse { resource_list }) => resource_list,
+            _ => panic!("Expected SupportedResourceResponse"),
+        };
+
+        // Collect generated resource types
+        let mut generated = std::collections::HashSet::new();
+
+        for resource in available.iter().copied() {
+            tx_expl
+                .send(ExplorerToPlanet::GenerateResourceRequest {
+                    explorer_id,
+                    resource,
+                })
+                .unwrap();
+
+            match rx_expl.recv_timeout(Duration::from_millis(200)) {
+                Ok(PlanetToExplorer::GenerateResourceResponse { resource }) => {
+                    let res = resource.expect("Generation should succeed");
+                    generated.insert(res.get_type());
+                }
+                _ => panic!("Expected GenerateResourceResponse"),
+            }
+        }
+
+        // Compare what was promised vs what was delivered
+        assert_eq!(
+            generated,
+            available,
+            "Phase {}: generated resources do not match supported ones",
+            i
+        );
+        let expected = expected_resources_for_phase(i);
+        assert_eq!(generated, expected, "Wrong resources for phase {}", i);
+
+        std::thread::sleep(Duration::from_secs(105));
     }
 }
