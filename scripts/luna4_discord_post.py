@@ -86,55 +86,6 @@ def get_cycle_and_phase():
     phase_name = list(PHASE_DATA.keys())[phase_index]
     return cycle, phase_name
 
-# ----------------------------
-# Observatory post (PINNED MESSAGE)
-# ----------------------------
-
-def post_observatory():
-    webhook = os.environ["DISCORD_OBSERVATORY_WEBHOOK"]
-    message_id = os.environ.get("OBSERVATORY_MESSAGE_ID")
-
-    if not message_id:
-        raise RuntimeError("OBSERVATORY_MESSAGE_ID is missing — cannot update pinned message")
-
-    cycle, phase_name = get_cycle_and_phase()
-    phase = PHASE_DATA[phase_name]
-
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-
-    content = f"""
-⋆⭒˚.⋆🌙⋆⭒˚.⋆  L U N A 4   O B S E R V A T O R Y  ⋆⭒˚.⋆🌙⋆⭒˚.⋆
-
-> The moon that feeds your world.  
-> Quiet. Essential. Always there.
-
-━━━━━━━━━━━━━━━━━━━━━━━
-
-{phase['emoji']} **Current Lunar State**  
-Cycle: **{cycle}**  
-Phase: **{phase_name}**
-
-🌘 Illumination: {phase['illumination']}  
-🌌 Surface Status: {phase['surface']}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-
-🪨 **Resources Available**
-""" + "\n".join(f"• {r}" for r in phase["resources"]) + f"""
-
-━━━━━━━━━━━━━━━━━━━━━━━
-
-🔮 **Observatory Reading**
-
-{phase['prophecy']}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-
-📡 *Observatory Status:* Stable  
-🕰 *Last updated:* {timestamp}
-
-⋆⁺₊⋆ ☾⋆⁺₊⋆  Luna4 watches. It always does.  ⋆⁺₊⋆ ☾⋆⁺₊⋆
-""".strip()
 
     # PATCH ONLY — never create new messages
     response = requests.patch(
