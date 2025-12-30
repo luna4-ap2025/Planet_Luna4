@@ -3,25 +3,29 @@ import requests
 from datetime import datetime
 import time
 
-#Post to discord
+# ----------------------------
+# Discord helpers
+# ----------------------------
+
 def post_to_discord(webhook_env, content):
     webhook_url = os.environ.get(webhook_env)
     if not webhook_url:
         print(f"No webhook found for {webhook_env}")
         return
-    payload = {"content": content}
+
     try:
-        requests.post(webhook_url, json=payload)
+        requests.post(webhook_url, json={"content": content})
         print(f"Posted to {webhook_env}")
     except Exception as e:
         print(f"Error posting to {webhook_env}: {e}")
 
-#Post to log in DarkSide of Luna4
 def log_darkside(message):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
     post_to_discord("LOGS_WEBHOOK", f"🛰 {timestamp} | {message}")
 
-#Observatory Def
+# ----------------------------
+# Observatory data
+# ----------------------------
 
 PHASE_DATA = {
     "New Moon": {
@@ -72,38 +76,45 @@ PHASE_DATA = {
     }
 }
 
-def get_current_phase():
-    phases = list(PHASE_DATA.keys())
-    PHASE_DURATION = 105  # seconds
+PHASE_DURATION = 105          # seconds per phase
+CYCLE_DURATION = PHASE_DURATION * 4  # full lunar cycle
+
+def get_cycle_and_phase():
     now = int(time.time())
-    index = (now // PHASE_DURATION) % len(phases)
-    return phases[index]
+    cycle = now // CYCLE_DURATION
+    phase_index = (now % CYCLE_DURATION) // PHASE_DURATION
+    phase_name = list(PHASE_DATA.keys())[phase_index]
+    return cycle, phase_name
+
+# ----------------------------
+# Observatory post (PINNED MESSAGE)
+# ----------------------------
 
 def post_observatory():
     webhook = os.environ["DISCORD_OBSERVATORY_WEBHOOK"]
     message_id = os.environ.get("OBSERVATORY_MESSAGE_ID")
 
-    phase_name = get_current_phase()
-    phase = PHASE_DATA[phase_name]
+    if not message_id:
+        raise RuntimeError("OBSERVATORY_MESSAGE_ID is missing — cannot update pinned message")
 
-    CYCLE_DURATION = 420
-    cycle = int(time.time()) // CYCLE_DURATION
+    cycle, phase_name = get_cycle_and_phase()
+    phase = PHASE_DATA[phase_name]
 
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
     content = f"""
 ⋆⭒˚.⋆🌙⋆⭒˚.⋆  L U N A 4   O B S E R V A T O R Y  ⋆⭒˚.⋆🌙⋆⭒˚.⋆
 
-> The moon that feeds your world.
+> The moon that feeds your world.  
 > Quiet. Essential. Always there.
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 
-{phase['emoji']} **Current Lunar State**
-Cycle: **{cycle}**
+{phase['emoji']} **Current Lunar State**  
+Cycle: **{cycle}**  
 Phase: **{phase_name}**
 
-🌘 Illumination: {phase['illumination']}
+🌘 Illumination: {phase['illumination']}  
 🌌 Surface Status: {phase['surface']}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
@@ -125,27 +136,25 @@ Phase: **{phase_name}**
 ⋆⁺₊⋆ ☾⋆⁺₊⋆  Luna4 watches. It always does.  ⋆⁺₊⋆ ☾⋆⁺₊⋆
 """.strip()
 
-    payload = {"content": content}
+    # PATCH ONLY — never create new messages
+    response = requests.patch(
+        f"{webhook}/messages/{message_id}",
+        json={"content": content}
+    )
 
-    if message_id:
-        requests.patch(f"{webhook}/messages/{message_id}", json=payload)
-    else:
-        requests.post(webhook, json=payload)
+    if response.status_code >= 300:
+        raise RuntimeError(f"Discord PATCH failed: {response.status_code} | {response.text}")
 
-last_update = int(os.environ.get("LAST_OBSERVATORY_UPDATE", "0"))
-now = int(time.time())
+# ----------------------------
+# Changelog & future hooks
+# ----------------------------
 
-if last_update and now - last_update > 600:
-    content += "\n\n⚠️ *Signal degradation detected. Observatory feed unstable.*"
-
-#Changelog log (lol)
 def post_changelog(tag, name, body):
     msg = f"🌒 Cycle Adjustment Detected {tag} — \"{name}\""
     if body:
-        msg += f" • {body.replace(chr(10),' • ')}"
+        msg += f" • {body.replace(chr(10), ' • ')}"
     post_to_discord("DISCORD_CHANGELOG_WEBHOOK", msg)
 
-#for future ideas
 def post_experiment(tag, name, url):
     msg = f"🌒 [Experiment] {tag} — \"{name}\" • {url}"
     post_to_discord("FUTURE_WEBHOOK", msg)
