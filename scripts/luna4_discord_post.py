@@ -72,7 +72,7 @@ PHASE_DATA = {
     }
 }
 
-    def get_current_phase():
+def get_current_phase():
     phases = list(PHASE_DATA.keys())
     PHASE_DURATION = 105  # seconds
     now = int(time.time())
