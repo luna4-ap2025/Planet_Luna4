@@ -91,9 +91,8 @@ prophecy = phase["prophecy"]
 timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
 # ---- Build content ----
-content = f"""
-⋆⭒˚.⋆🌙⋆⭒˚.⋆  L U N A 4   O B S E R V A T O R Y  ⋆⭒˚.⋆🌙⋆⭒˚.⋆
-
+embed{ = "title": "⋆⭒˚.⋆🌙⋆⭒˚.⋆  L U N A 4   O B S E R V A T O R Y  ⋆⭒˚.⋆🌙⋆⭒˚.⋆",
+    "description": f"""
 > The moon that feeds your world.
 > Quiet. Essential. Always there.
 
@@ -121,9 +120,10 @@ Phase: **{phase['name']}**
 
 📡 *Observatory Status:* Stable
 🕰 *Last updated:* {timestamp}
-
-⋆⁺₊⋆ ☾⋆⁺₊⋆  Luna4 watches. It always does.  ⋆⁺₊⋆ ☾⋆⁺₊⋆
-""".strip()
+""",
+    "color": phase["color"],  # if you have a color per phase
+    "footer": {"text": "⋆⁺₊⋆ ☾⋆⁺₊⋆  Luna4 watches. It always does.  ⋆⁺₊⋆ ☾⋆⁺₊⋆"}
+}
 
 # ---- Signal degradation ----
 LAST_UPDATE = int(os.environ.get("LAST_OBSERVATORY_UPDATE", "0"))
