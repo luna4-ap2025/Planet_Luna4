@@ -90,8 +90,9 @@ resources_block = "\n".join(f"• {r}" for r in phase["resources"])
 prophecy = phase["prophecy"]
 timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
-# ---- Build content ----
-embed{ = "title": "⋆⭒˚.⋆🌙⋆⭒˚.⋆  L U N A 4   O B S E R V A T O R Y  ⋆⭒˚.⋆🌙⋆⭒˚.⋆",
+# ---- Build embed ----
+embed = {
+    "title": "⋆⭒˚.⋆🌙⋆⭒˚.⋆  L U N A 4   O B S E R V A T O R Y  ⋆⭒˚.⋆🌙⋆⭒˚.⋆",
     "description": f"""
 > The moon that feeds your world.
 > Quiet. Essential. Always there.
@@ -124,6 +125,7 @@ Phase: **{phase['name']}**
     "color": phase["color"],  # if you have a color per phase
     "footer": {"text": "⋆⁺₊⋆ ☾⋆⁺₊⋆  Luna4 watches. It always does.  ⋆⁺₊⋆ ☾⋆⁺₊⋆"}
 }
+
 
 # ---- Signal degradation ----
 LAST_UPDATE = int(os.environ.get("LAST_OBSERVATORY_UPDATE", "0"))
