@@ -31,3 +31,11 @@ jobs:
 
       - name: Install dependencies
         run: pip install requests  
+
+      - name: Update Observatory
+        env:
+          DISCORD_OBSERVATORY_WEBHOOK: ${{ secrets.DISCORD_OBSERVATORY_WEBHOOK }}
+          OBSERVATORY_MESSAGE_ID: ${{ secrets.OBSERVATORY_MESSAGE_ID }}
+        run: |
+          python scripts/luna4_observatory.py
+
