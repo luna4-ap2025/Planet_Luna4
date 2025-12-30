@@ -311,9 +311,22 @@ fn test_generation_fails_without_energy() {
     let rx_expl = register_explorer(explorer_id, &tx_orch, &rx_orch);
 
     tx_expl
+        .send(ExplorerToPlanet::SupportedResourceRequest {
+            explorer_id
+        }).unwrap();
+    let available = match rx_expl.recv_timeout(Duration::from_millis(200)) {
+        Ok(PlanetToExplorer::SupportedResourceResponse { resource_list }) => resource_list,
+        _ => panic!("Expected SupportedResourceResponse"),
+    };
+
+    let resource = *available
+        .iter()
+        .next()
+        .expect("SupportedResourceResponse should not be empty");
+    tx_expl
         .send(ExplorerToPlanet::GenerateResourceRequest {
             explorer_id,
-            resource: BasicResourceType::Carbon,
+            resource,
         })
         .unwrap();
 
@@ -337,11 +350,25 @@ fn test_generation_consumes_energy() {
 
     charge_cells(1, &tx_orch, &rx_orch);
 
+    tx_expl
+        .send(ExplorerToPlanet::SupportedResourceRequest {
+            explorer_id
+        }).unwrap();
+    let available = match rx_expl.recv_timeout(Duration::from_millis(200)) {
+        Ok(PlanetToExplorer::SupportedResourceResponse { resource_list }) => resource_list,
+        _ => panic!("Expected SupportedResourceResponse"),
+    };
+
+    let resource = *available
+        .iter()
+        .next()
+        .expect("SupportedResourceResponse should not be empty");
+
     // Generate resource
     tx_expl
         .send(ExplorerToPlanet::GenerateResourceRequest {
             explorer_id,
-            resource: BasicResourceType::Oxygen,
+            resource,
         })
         .unwrap();
 
@@ -375,18 +402,26 @@ fn test_sequential_energy_consumption() {
 
     charge_cells(3, &tx_orch, &rx_orch);
 
-    let resources = [
-        BasicResourceType::Carbon,
-        BasicResourceType::Hydrogen,
-        BasicResourceType::Silicon,
-    ];
-
     // Generate 3 resources, verify count decreases
-    for (i, resource_type) in resources.iter().enumerate() {
+    for i in 0..3 {
+        tx_expl
+            .send(ExplorerToPlanet::SupportedResourceRequest {
+                explorer_id
+            }).unwrap();
+        let available = match rx_expl.recv_timeout(Duration::from_millis(200)) {
+            Ok(PlanetToExplorer::SupportedResourceResponse { resource_list }) => resource_list,
+            _ => panic!("Expected SupportedResourceResponse"),
+        };
+
+        let resource = *available
+            .iter()
+            .next()
+            .expect("SupportedResourceResponse should not be empty");
+
         tx_expl
             .send(ExplorerToPlanet::GenerateResourceRequest {
                 explorer_id,
-                resource: *resource_type,
+                resource,
             })
             .unwrap();
         let _ = rx_expl.recv_timeout(Duration::from_millis(200));
@@ -410,9 +445,22 @@ fn test_sequential_energy_consumption() {
 
     // Try 4th generation - should fail
     tx_expl
+        .send(ExplorerToPlanet::SupportedResourceRequest {
+            explorer_id
+        }).unwrap();
+    let available = match rx_expl.recv_timeout(Duration::from_millis(200)) {
+        Ok(PlanetToExplorer::SupportedResourceResponse { resource_list }) => resource_list,
+        _ => panic!("Expected SupportedResourceResponse"),
+    };
+
+    let resource = *available
+        .iter()
+        .next()
+        .expect("SupportedResourceResponse should not be empty");
+    tx_expl
         .send(ExplorerToPlanet::GenerateResourceRequest {
             explorer_id,
-            resource: BasicResourceType::Oxygen,
+            resource,
         })
         .unwrap();
     match rx_expl.recv_timeout(Duration::from_millis(200)) {
