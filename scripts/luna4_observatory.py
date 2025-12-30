@@ -128,13 +128,15 @@ Phase: **{phase['name']}**
 
 # ---- Signal degradation ----
 LAST_UPDATE = int(os.environ.get("LAST_OBSERVATORY_UPDATE", "0"))
+description = embed["description"]
 if LAST_UPDATE and now - LAST_UPDATE > CYCLE_DURATION:
-    content += "\n\n⚠️ *Signal degradation detected. Observatory feed unstable.*"
+    description += "\n\n⚠️ *Signal degradation detected. Observatory feed unstable.*"
+embed["description"] = description
 
 # ---- Send to Discord ----
 WEBHOOK_OBSERVATORY = os.environ["DISCORD_OBSERVATORY_WEBHOOK"]
 MESSAGE_ID = os.environ["OBSERVATORY_MESSAGE_ID"]
 
-payload = {"embeds": [embed]}  # use the embed, not plain text
+payload = {"content": "", "embeds": [embed]}  # content empty, only embed
 requests.patch(f"{WEBHOOK_OBSERVATORY}/messages/{MESSAGE_ID}", json=payload)
-#log_darkside(f"Observatory cycle {cycle} updated successfully.")
+
