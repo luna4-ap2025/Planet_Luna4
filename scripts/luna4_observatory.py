@@ -135,9 +135,5 @@ WEBHOOK_OBSERVATORY = os.environ["DISCORD_OBSERVATORY_WEBHOOK"]
 MESSAGE_ID = os.environ["OBSERVATORY_MESSAGE_ID"]
 
 payload = {"embeds": [embed]}  # use the embed, not plain text
-
-requests.patch(
-    f"{WEBHOOK_OBSERVATORY}/messages/{MESSAGE_ID}",
-    json={"content": content}
-)
+requests.patch(f"{WEBHOOK_OBSERVATORY}/messages/{MESSAGE_ID}", json=payload)
 #log_darkside(f"Observatory cycle {cycle} updated successfully.")
