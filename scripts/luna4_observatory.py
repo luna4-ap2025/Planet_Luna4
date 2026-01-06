@@ -1,87 +1,142 @@
-import time
-import json
 import os
 import requests
+import time
+from datetime import datetime
 
-WEBHOOK_OBSERVATORY = os.environ["DISCORD_OBSERVATORY_WEBHOOK"]
-STATE_FILE = "scripts/observatory_state.json"
+# ---- Discord helpers ----
+def post_to_discord(webhook_env, content):
+    webhook_url = os.environ.get(webhook_env)
+    if not webhook_url:
+        print(f"No webhook found for {webhook_env}")
+        return
+    payload = {"content": content}
+    try:
+        requests.post(webhook_url, json=payload)
+        print(f"Posted to {webhook_env}")
+    except Exception as e:
+        print(f"Error posting to {webhook_env}: {e}")
 
+def log_darkside(message):
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    post_to_discord("LOGS_WEBHOOK", f"🛰 {timestamp} | {message}")
+
+# ---- Phase data ----
 PHASES = [
     {
-        "emoji": "🌑",
         "name": "New Moon",
-        "color": 0x2b2d31,
-        "resources": ["Carbon"]
+        "emoji": "🌑",
+        "illumination": "0%",
+        "surface": "Veiled",
+        "resources": ["Carbon"],
+        "prophecy": (
+            "Luna4 has turned inward.\n\n"
+            "The surface sleeps beneath shadow,\n"
+            "and only the patient may gather what lies below.\n"
+            "Rare matter surfaces briefly,\n"
+            "rewarding those who arrive in silence."
+        )
     },
     {
-        "emoji": "🌓",
         "name": "First Quarter",
-        "color": 0x3498db,
-        "resources": ["Oxygen", "Hydrogen"]
+        "emoji": "🌓",
+        "illumination": "50%",
+        "surface": "Awakening",
+        "resources": ["Oxygen", "Hydrogen"],
+        "prophecy": (
+            "Light returns unevenly.\n\n"
+            "Common matter rises first,\n"
+            "preparing the way for greater yield."
+        )
     },
     {
-        "emoji": "🌕",
         "name": "Full Moon",
-        "color": 0xf1c40f,
-        "resources": ["All Resources"]
+        "emoji": "🌕",
+        "illumination": "100%",
+        "surface": "Exposed",
+        "resources": ["All Resources"],
+        "prophecy": (
+            "Nothing is hidden.\n\n"
+            "Luna4 offers everything it has,\n"
+            "and the surface hums with abundance."
+        )
     },
     {
-        "emoji": "🌗",
         "name": "Last Quarter",
-        "color": 0x1abc9c,
-        "resources": ["Oxygen", "Silicon"]
+        "emoji": "🌗",
+        "illumination": "50%",
+        "surface": "Unstable",
+        "resources": ["Oxygen", "Silicon"],
+        "prophecy": (
+            "The light withdraws.\n\n"
+            "What remains is unstable,\n"
+            "a reminder that cycles do not linger."
+        )
     }
 ]
 
-CYCLE_DURATION = 420
-PHASE_DURATION = 105
-
-# ---- Load state ----
-if os.path.exists(STATE_FILE):
-    with open(STATE_FILE, "r") as f:
-        state = json.load(f)
-else:
-    state = {}
-
-# ---- Compute phase ----
+# ---- Timing math ----
+CYCLE_DURATION = 420  # seconds
+PHASE_DURATION = 105  # seconds
+LUNA4_EPOCH = 1767052800  # 30 Dec 2025 00:00 UTC
 now = int(time.time())
-cycle = now // CYCLE_DURATION
-phase_index = (now % CYCLE_DURATION) // PHASE_DURATION
-phase = PHASES[int(phase_index)]
-time_remaining = PHASE_DURATION - (now % PHASE_DURATION)
+elapsed = now - LUNA4_EPOCH
 
+cycle = elapsed // CYCLE_DURATION
+phase_index = int((elapsed % CYCLE_DURATION) // PHASE_DURATION)
+phase = PHASES[phase_index]
+
+# ---- Resources & prophecy ----
+resources_block = "\n".join(f"• {r}" for r in phase["resources"])
+prophecy = phase["prophecy"]
+timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+
+# ---- Build embed ----
 embed = {
-    "title": f"{phase['emoji']} Luna4 Observatory",
-    "description": (
-        f"**Phase:** {phase['name']}\n"
-        f"**Cycle:** #{cycle}\n"
-        f"**Time Remaining:** {time_remaining}s\n\n"
-        f"**Available Resources:**\n"
-        + "\n".join(f"• {r}" for r in phase["resources"])
-    ),
-    "color": phase["color"],
-    "footer": {
-        "text": "Luna4 🌙 The moon that feeds your world"
-    }
+    "title": "⋆⭒˚.⋆🌙⋆⭒˚.⋆  L U N A 4   O B S E R V A T O R Y  ⋆⭒˚.⋆🌙⋆⭒˚.⋆",
+    "description": f"""
+> The moon that feeds your world.
+> Quiet. Essential. Always there.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+{phase['emoji']} **Current Lunar State**
+Cycle: **{cycle}**
+Phase: **{phase['name']}**
+
+🌘 Illumination: {phase['illumination']}
+🌌 Surface Status: {phase['surface']}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🪨 **Resources Available**
+{resources_block}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🔮 **Observatory Reading**
+
+{prophecy}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+📡 *Observatory Status:* Stable
+🕰 *Last updated:* {timestamp}
+""",
+    "footer": {"text": "⋆⁺₊⋆ ☾⋆⁺₊⋆  Luna4 watches. It always does.  ⋆⁺₊⋆ ☾⋆⁺₊⋆"}
 }
 
-payload = {"embeds": [embed]}
 
-# ---- Post or edit ----
-if "message_id" in state:
-    # Edit existing message
-    requests.patch(
-        f"{WEBHOOK_OBSERVATORY}/messages/{state['message_id']}",
-        json=payload
-    )
-else:
-    # Create message and save ID
-    response = requests.post(
-        WEBHOOK_OBSERVATORY + "?wait=true",
-        json=payload
-    ).json()
+# ---- Signal degradation ----
+LAST_UPDATE = int(os.environ.get("LAST_OBSERVATORY_UPDATE", "0"))
+description = embed["description"]
+if LAST_UPDATE and now - LAST_UPDATE > CYCLE_DURATION:
+    description += "\n\n⚠️ *Signal degradation detected. Observatory feed unstable.*"
+embed["description"] = description
 
-    state["message_id"] = response["id"]
+# ---- Send to Discord ----
+WEBHOOK_OBSERVATORY = os.environ["DISCORD_OBSERVATORY_WEBHOOK"]
+MESSAGE_ID = os.environ["OBSERVATORY_MESSAGE_ID"]
 
-    with open(STATE_FILE, "w") as f:
-        json.dump(state, f)
+payload = {"content": "", "embeds": [embed]}  # content empty, only embed
+requests.patch(f"{WEBHOOK_OBSERVATORY}/messages/{MESSAGE_ID}", json=payload)
+

@@ -36,7 +36,7 @@ impl AvailableResources {
     
     /// Creates the resource set for New Moon phase
     ///
-    /// New Moon enables rare elements only (Silicon and Carbon)
+    /// New Moon enables rare element only (Carbon)
     /// according to the "rare elements in the dark" lore.
     ///
     /// # Returns
@@ -44,7 +44,6 @@ impl AvailableResources {
     pub(crate) fn new_moon() -> Self {
         let mut basic = HashSet::new();
         // Rare elements in the dark
-        basic.insert(BasicResourceType::Silicon);
         basic.insert(BasicResourceType::Carbon);
         
         Self {
@@ -96,14 +95,15 @@ impl AvailableResources {
     /// Creates the resource set for Last Quarter phase
     ///
     /// Last Quarter is a preparation phase with limited resources
-    /// (only Hydrogen as basic fuel).
+    /// (Oxigen and Silicon).
     ///
     /// # Returns
     /// `AvailableResources` for Last Quarter phase
     pub(crate) fn last_quarter() -> Self {
         let mut basic = HashSet::new();
         // Preparation phase - limited resources
-        basic.insert(BasicResourceType::Hydrogen);
+        basic.insert(BasicResourceType::Oxygen);
+        basic.insert(BasicResourceType::Silicon);
         
         Self {
             basic,
