@@ -8,11 +8,13 @@
 
 pub mod planet;
 pub mod logging;
-mod planet_integration_test;
 mod tests;
 
 // Re-export the main entry point
 pub use planet::{Luna4, Luna4Id};
+
+// Re-export visualizer API
+pub use planet::{AvailableResources, PlanetVisualizer, LunarPhase};
 
 /// Main entry point for Luna4 planet
 ///
@@ -74,4 +76,3 @@ pub fn create_planet(
 
     Ok(planet)
 }
-

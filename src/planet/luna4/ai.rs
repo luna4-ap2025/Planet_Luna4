@@ -4,31 +4,45 @@
 //! It handles all message processing from orchestrators and explorers
 //! according to Luna4's lunar cycle and resource availability rules.
 
-//! Luna4 AI implementation
-
 use crate::planet::state::Luna4State;
 use crate::planet::energy::EnergyManager;
 use crate::planet::resources::ResourceManager;
 use crate::planet::luna4::Luna4Id;
+use crate::planet::{AvailableResources, PlanetVisualizer};
 
 use common_game::components::planet::{PlanetAI, PlanetState, DummyPlanetState};
-use common_game::components::resource::{Generator, Combinator};
+use common_game::components::resource::{Generator, Combinator, BasicResourceType};
 use common_game::components::rocket::Rocket;
 use common_game::components::sunray::Sunray;
 use common_game::protocols::planet_explorer::{ExplorerToPlanet, PlanetToExplorer};
 
 /// Luna4 AI implementation
+///
+/// Handles all game logic for Luna4 planets including:
+/// - Lunar phase management and transitions
+/// - Resource availability based on current phase
+/// - Energy cell management (5 cells for Type D)
+/// - Explorer interactions and message processing
+/// - Real-time state tracking for visualizer access
 pub struct Luna4AI {
-    /// Planet state
+    /// Planet state (current phase, explorer presence, statistics)
     state: Luna4State,
-    /// Energy management
+    /// Energy management system (5 energy cells)
     energy: EnergyManager,
-    /// Resource management
+    /// Resource management system (phase-based availability)
     resources: ResourceManager,
 }
 
 impl Luna4AI {
     /// Creates a new Luna4 AI instance
+    ///
+    /// # Arguments
+    /// * `id` - Unique Luna4 identifier
+    /// * `energy` - Energy management system
+    /// * `resources` - Resource management system
+    ///
+    /// # Returns
+    /// New Luna4AI instance ready to handle planet operations
     pub fn new(
         id: Luna4Id,
         energy: EnergyManager,
@@ -210,5 +224,43 @@ impl PlanetAI for Luna4AI {
         _combinator: &Combinator,
     ) {
         log::info!("Luna4 #{} stopped operation", self.state.id);
+    }
+}
+
+impl PlanetVisualizer for Luna4AI {
+    /// Get current resource availability information for visualizer
+    ///
+    /// This method provides real-time access to:
+    /// - Current lunar phase
+    /// - Resources available in current phase
+    /// - All possible resources Luna4 can generate
+    ///
+    /// # Returns
+    /// `AvailableResources` containing current phase and resource information
+    ///
+    /// # Example Phase-Resource Mapping
+    /// - New Moon: Carbon only
+    /// - First Quarter: Oxygen, Hydrogen
+    /// - Full Moon: All four basic resources
+    /// - Last Quarter: Oxygen, Silicon
+    fn get_current_resources(&self) -> AvailableResources {
+        let current_phase = self.state.current_phase;
+
+        // Get resources available in current phase (real-time)
+        let phase_resources = self.resources.get_available_resources(current_phase);
+
+        // All possible resources Luna4 can generate (unbounded generation)
+        let all_possible = vec![
+            BasicResourceType::Oxygen,
+            BasicResourceType::Hydrogen,
+            BasicResourceType::Carbon,
+            BasicResourceType::Silicon,
+        ];
+
+        AvailableResources {
+            current_phase,
+            basic_resources: phase_resources.basic,
+            all_possible_resources: all_possible.into_iter().collect(),
+        }
     }
 }

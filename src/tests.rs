@@ -2,6 +2,8 @@
 mod tests {
     use std::time::Duration;
     use common_game::components::resource::BasicResourceType;
+    use common_game::protocols::orchestrator_planet::{OrchestratorToPlanet, PlanetToOrchestrator};
+    use common_game::protocols::planet_explorer::ExplorerToPlanet;
     use super::*;
     use crossbeam_channel::unbounded;
     use crate::{create_planet, Luna4};
@@ -151,8 +153,46 @@ mod tests {
         assert_eq!(custom_cycle.total_cycle_seconds, 200);
         assert_eq!(custom_cycle.phase_duration(LunarPhase::NewMoon).as_secs(), 50);
     }
-    
+
+    #[test]
+    fn test_create_planet_function_exists() {
+        // Verify the function signature compiles
+        let (_tx_orch, rx_orch) = unbounded::<common_game::protocols::orchestrator_planet::OrchestratorToPlanet>();
+        let (tx_planet, _rx_planet) = unbounded::<common_game::protocols::orchestrator_planet::PlanetToOrchestrator>();
+        let (_tx_expl, rx_expl) = unbounded::<common_game::protocols::planet_explorer::ExplorerToPlanet>();
+
+        let _result = create_planet(1, rx_orch, tx_planet, rx_expl);
+    }
+
+    #[test]
+    fn test_luna4_phase_resources_mapping() {
+        use crate::planet::resources::ResourceManager;
+        use crate::planet::cycle::LunarPhase;
+
+        let manager = ResourceManager::new();
+
+        // Test each phase
+        let new_moon = manager.get_available_resources(LunarPhase::NewMoon);
+        assert_eq!(new_moon.basic.len(), 1);
+        assert!(new_moon.basic.contains(&BasicResourceType::Carbon));
+
+        let first_quarter = manager.get_available_resources(LunarPhase::FirstQuarter);
+        assert_eq!(first_quarter.basic.len(), 2);
+        assert!(first_quarter.basic.contains(&BasicResourceType::Oxygen));
+        assert!(first_quarter.basic.contains(&BasicResourceType::Hydrogen));
+
+        let full_moon = manager.get_available_resources(LunarPhase::FullMoon);
+        assert_eq!(full_moon.basic.len(), 4);
+
+        let last_quarter = manager.get_available_resources(LunarPhase::LastQuarter);
+        assert_eq!(last_quarter.basic.len(), 2);
+        assert!(last_quarter.basic.contains(&BasicResourceType::Oxygen));
+        assert!(last_quarter.basic.contains(&BasicResourceType::Silicon));
+    }
 }
+
+
+
 
 
 
