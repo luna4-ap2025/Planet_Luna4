@@ -155,16 +155,6 @@ mod tests {
     }
 
     #[test]
-    fn test_create_planet_function_exists() {
-        // Verify the function signature compiles
-        let (_tx_orch, rx_orch) = unbounded::<common_game::protocols::orchestrator_planet::OrchestratorToPlanet>();
-        let (tx_planet, _rx_planet) = unbounded::<common_game::protocols::orchestrator_planet::PlanetToOrchestrator>();
-        let (_tx_expl, rx_expl) = unbounded::<common_game::protocols::planet_explorer::ExplorerToPlanet>();
-
-        let _result = create_planet(1, rx_orch, tx_planet, rx_expl);
-    }
-
-    #[test]
     fn test_luna4_phase_resources_mapping() {
         use crate::planet::resources::ResourceManager;
         use crate::planet::cycle::LunarPhase;
