@@ -8,7 +8,8 @@
 
 pub mod planet;
 pub mod logging;
-mod planet_integration_test; //place-holder, remove later
+mod planet_integration_test;
+mod tests;
 
 // Re-export the main entry point
 pub use planet::{Luna4, Luna4Id};
@@ -38,56 +39,39 @@ pub fn create_planet(
 ) -> Result<planet::Planet, String> {
     use logging::log_planet_event;
     use common_game::logging::{EventType, Channel};
-    
+
     let planet_id = Luna4Id::new(id);
-    
+
     // Log initialization using structured logging
-log_planet_event(
-    planet_id,
-    EventType::InternalPlanetAction,
-    Channel::Info,
-    "Luna4 initializing",
-    None::<[(&str, String); 0]>,  // Explicit type annotation
-);
-    
+    log_planet_event(
+        planet_id,
+        EventType::InternalPlanetAction,
+        Channel::Info,
+        "Luna4 initializing",
+        None::<[(&str, String); 0]>,
+    );
+
     // Create Luna4 instance
     let luna4 = match Luna4::new(id) {
         Ok(luna) => luna,
-        Err(e) => return Err(format!("Failed to create Luna4: {e}")),
+        Err(e) => return Err(format!("Failed to create Luna4: {}", e)),
     };
-    
+
     // Create the common Planet wrapper
     let planet = match luna4.create_planet(rx_orchestrator, tx_orchestrator, rx_explorer) {
         Ok(p) => p,
-        Err(e) => return Err(format!("Failed to create planet: {e}")),
+        Err(e) => return Err(format!("Failed to create planet: {}", e)),
     };
-    
+
     // Log successful initialization
-log_planet_event(
-    planet_id,
-    EventType::InternalPlanetAction,
-    Channel::Info,
-    "Luna4 initialization complete",
-    None::<[(&str, String); 0]>,  // Explicit type annotation
-);
-    
+    log_planet_event(
+        planet_id,
+        EventType::InternalPlanetAction,
+        Channel::Info,
+        "Luna4 initialization complete",
+        None::<[(&str, String); 0]>,
+    );
+
     Ok(planet)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crossbeam_channel::unbounded;
-
-    //noinspection ALL
-    #[test]
-    fn test_create_planet_function_exists() {
-        // Just verify the function signature compiles
-        let (_tx_orch, rx_orch) = unbounded::<common_game::protocols::orchestrator_planet::OrchestratorToPlanet>();
-        let (tx_planet, _rx_planet) = unbounded::<common_game::protocols::orchestrator_planet::PlanetToOrchestrator>();
-        let (_tx_expl, rx_expl) = unbounded::<common_game::protocols::planet_explorer::ExplorerToPlanet>();
-        
-        // Should compile - actual execution would require proper setup
-        let _result = create_planet(1, rx_orch, tx_planet, rx_expl);
-    }
-}

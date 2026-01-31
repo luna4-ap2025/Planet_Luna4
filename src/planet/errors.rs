@@ -33,24 +33,3 @@ pub enum Luna4Error {
     #[error("Operational error: {0}")]
     OperationalError(String),
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    
-    #[test]
-    fn test_error_display() {
-        let error = Luna4Error::EnergyError("test error".to_string());
-        assert_eq!(format!("{}", error), "Invalid energy configuration: test error");
-        
-        let error = Luna4Error::PlanetCreation("creation failed".to_string());
-        assert_eq!(format!("{}", error), "Failed to create planet: creation failed");
-    }
-    
-    #[test]
-    fn test_error_debug() {
-        let error = Luna4Error::ResourceError("cannot generate".to_string());
-        // Should not panic when formatting for debug
-        let _ = format!("{:?}", error);
-    }
-}

@@ -12,6 +12,8 @@ common-game = "3.0.0"
 crossbeam-channel = "0.5"
 log = "0.4"
 thiserror = "2.0"
+strum = { version = "0.26", features = ["derive"] }
+enum-as-inner = "0.6"
 
 [dev-dependencies]
 tempfile = "3.4"

@@ -4,7 +4,7 @@
 //! `common_game` logging protocol with Luna4-specific context.
 
 use common_game::logging::{LogEvent, Participant, ActorType, EventType, Channel, Payload};
-use crate::planet::{Luna4Id, LunarPhase, OperationalStats};
+use crate::planet::{Luna4Id, LunarPhase};
 
 /// Logs a structured event from a Luna4 planet.
 pub fn log_planet_event(
@@ -118,7 +118,7 @@ pub fn log_explorer_interaction(
 #[allow(dead_code)]
 pub(crate) fn log_operational_statistics(
     planet_id: Luna4Id,
-    stats: &OperationalStats,
+    stats: &crate::planet::state::OperationalStats,
     energy_charged: usize,
     energy_total: usize,
 ) {
