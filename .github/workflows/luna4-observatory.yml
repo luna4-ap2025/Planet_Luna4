@@ -5,7 +5,7 @@ permissions:
 
 on:
   schedule:
-    - cron: "*/1 * * * *"
+    - cron: "0 0 * * *"   # once per day (UTC)
   workflow_dispatch:
 
 jobs:
@@ -20,14 +20,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-     
-      - name: Commit observatory state
-        run: |
-          git config user.name "luna4-observatory"
-          git config user.email "observatory@luna4"
-          git add scripts/observatory_state.json
-          git commit -m "🔭 Update observatory state" || echo "No changes"
-          git push
 
       - name: Install dependencies
         run: pip install requests  
@@ -36,6 +28,12 @@ jobs:
         env:
           DISCORD_OBSERVATORY_WEBHOOK: ${{ secrets.DISCORD_OBSERVATORY_WEBHOOK }}
           OBSERVATORY_MESSAGE_ID: ${{ secrets.OBSERVATORY_MESSAGE_ID }}
-        run: |
-          python scripts/luna4_observatory.py
+        run: python scripts/luna4_observatory.py
 
+      - name: Commit observatory state
+        run: |
+          git config user.name "luna4-observatory"
+          git config user.email "observatory@luna4"
+          git add scripts/observatory_state.json
+          git commit -m "🔭 Update observatory state" || echo "No changes"
+          git push
